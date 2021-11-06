@@ -32,6 +32,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.8.2
       - name: Install and Build 🔧
         run:
           mvn clean install -DskipTests=true
