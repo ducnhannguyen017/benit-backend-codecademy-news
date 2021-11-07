@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.benit.backend_codecademy_news.constant.JwtConstant;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 try {
                     //detach token
                     String token =authorizationHeader.substring("Bearer ".length());
-                    Algorithm algorithm= Algorithm.HMAC256("secretkey".getBytes());
+                    Algorithm algorithm= Algorithm.HMAC256(JwtConstant.secretKey.getBytes());
                     JWTVerifier verifier = JWT.require(algorithm).build();
                     DecodedJWT decodedJWT= verifier.verify(token);
                     //get infor in token

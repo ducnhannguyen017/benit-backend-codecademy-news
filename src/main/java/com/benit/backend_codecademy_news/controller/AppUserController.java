@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.benit.backend_codecademy_news.CustomResponse;
+import com.benit.backend_codecademy_news.constant.JwtConstant;
 import com.benit.backend_codecademy_news.dto.user.AppUserDto;
 import com.benit.backend_codecademy_news.dto.user.LoginDto;
 import com.benit.backend_codecademy_news.dto.user.SignUpDto;
@@ -101,7 +102,7 @@ public class AppUserController {
             try {
                 //detach refresh_token
                 String refresh_token =authorizationHeader.substring("Bearer ".length());
-                Algorithm algorithm= Algorithm.HMAC256("secretkey".getBytes());
+                Algorithm algorithm= Algorithm.HMAC256(JwtConstant.secretKey.getBytes());
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT= verifier.verify(refresh_token);
                 //get information in refresh_token
