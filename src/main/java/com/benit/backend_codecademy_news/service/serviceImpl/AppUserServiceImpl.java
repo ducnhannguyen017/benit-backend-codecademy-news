@@ -112,8 +112,10 @@ public class AppUserServiceImpl implements AppUserService , UserDetailsService {
         log.info("Updating role {} ", updateUserDto.getName());
         try{
             AppUser appUserToUpdate = appUserRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("not found"));
+            Role role= roleRepo.findByName(updateUserDto.getRole());
             appUserToUpdate.setName(updateUserDto.getName());
             appUserToUpdate.setIntroduction(updateUserDto.getIntroduction());
+            appUserToUpdate.getRoles().add(role);
             return appUserToUpdate;
         }catch (Exception e){
             return null;
