@@ -7,11 +7,11 @@ import javax.annotation.PostConstruct;
 
 @Component
 public class JwtConstant {
-    public static final long EXPIRATION_TIME_ACCESS_KEY = 20*60*1000;
-    public static final long EXPIRATION_TIME_REFRESH_KEY = 30*24*60*60*1000;
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static String SECRET_KEY;
     private final Environment environment;
+    public static String SECRET_KEY;
+    public static final long EXPIRATION_TIME_ACCESS_KEY = 60 * 60 * 1000;
+    public static final long EXPIRATION_TIME_REFRESH_KEY = 30 * 24 * 60*60*1000;
+    public static final String TOKEN_PREFIX = "Bearer ";
 
     public JwtConstant(Environment environment) {
         this.environment = environment;
