@@ -72,9 +72,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtConstant.EXPIRATION_TIME_REFRESH_KEY))
                 .withIssuer(request.getRequestURL().toString())
-                .withClaim("roles", user.getAuthorities()
-                        .stream().map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
                 .sign(algorithm);
 
         AppUser appUser= appUserService.getUserByUsername(user.getUsername());
