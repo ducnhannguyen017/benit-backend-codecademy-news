@@ -24,6 +24,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +36,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.stream;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
@@ -77,7 +81,7 @@ public class AppUserController {
         return ResponseEntity.ok().body(savedAppUser);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody @Valid UpdateUserDto updateUserDto) throws ResourceNotFoundException {
         AppUser updateUser = appUserService.updateUser(id, updateUserDto);
         if(updateUser==null){
@@ -100,14 +104,15 @@ public class AppUserController {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         if(authorizationHeader!=null&&authorizationHeader.startsWith(JwtConstant.TOKEN_PREFIX)){
             try {
-                //detach refresh_token
+                //detach token
                 String refresh_token =authorizationHeader.substring(JwtConstant.TOKEN_PREFIX.length());
                 Algorithm algorithm= Algorithm.HMAC256(JwtConstant.SECRET_KEY.getBytes());
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT= verifier.verify(refresh_token);
-                //get information in refresh_token
+
+                //get infor in token
                 String username = decodedJWT.getSubject();
-                AppUser appUser= appUserService.getUserByUsername(username);
+                AppUser appUser = appUserService.getUserByUsername(username);
 
                 String access_token= JWT.create()
                         .withSubject(appUser.getUsername())
@@ -119,13 +124,14 @@ public class AppUserController {
                         .sign(algorithm);
 
                 Map<String, String> tokens = new HashMap<>();
-                tokens.put("accessToken", access_token);
-                tokens.put("refreshToken", refresh_token);
+                tokens.put("access_token", access_token);
+                tokens.put("refresh_token", refresh_token);
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), tokens);
             }catch (Exception exception){
                 response.setHeader("error", exception.getMessage());
                 response.setStatus(HttpStatus.FORBIDDEN.value());
+
                 Map<String, String> errors = new HashMap<>();
                 errors.put("error_message", exception.getMessage());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
