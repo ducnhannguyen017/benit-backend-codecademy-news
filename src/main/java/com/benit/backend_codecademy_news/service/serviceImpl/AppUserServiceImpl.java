@@ -58,17 +58,22 @@ public class AppUserServiceImpl implements AppUserService , UserDetailsService {
     public AppUser saveUser(SignUpDto signUpDto) {
         log.info("Saving new user {} to database", signUpDto.getUsername());
         try{
-            signUpDto.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-            Set<Role> roles = new HashSet<Role>();
-            roles.add(roleRepo.findByName("ROLE_USER"));
+            Optional<AppUser> existedUser = Optional.ofNullable(appUserRepo.findByUsername(signUpDto.getUsername()));
+            if (!existedUser.isPresent()) {
+                signUpDto.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
+                Set<Role> roles = new HashSet<Role>();
+                roles.add(roleRepo.findByName("ROLE_USER"));
 
-            Image image = imageRepo.findById(1L).orElseThrow(
-                    ()->new ResourceNotFoundException("not found")
-            );
-            AppUser appUser = new AppUser(signUpDto.getUsername(), signUpDto.getPassword());
-            appUser.setRoles(roles);
-            appUser.setAvatar(image.getFilename());
-            return  appUserRepo.save(appUser);
+                Image image = imageRepo.findById(1L).orElseThrow(
+                        () -> new ResourceNotFoundException("not found")
+                );
+                AppUser appUser = new AppUser(signUpDto.getName(), signUpDto.getUsername(), signUpDto.getPassword(), "Your Introduction");
+                appUser.setRoles(roles);
+                appUser.setAvatar(image.getFilename());
+                return appUserRepo.save(appUser);
+            }else{
+                throw  new ResourceNotFoundException("This user existed");
+            }
         }catch (Exception e){
             return null;
         }

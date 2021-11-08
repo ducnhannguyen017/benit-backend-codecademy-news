@@ -76,7 +76,7 @@ public class AppUserController {
     public ResponseEntity<?>saveUser(@Valid @RequestBody SignUpDto signUpDto) throws ResourceNotFoundException {
         AppUser savedAppUser = appUserService.saveUser(signUpDto);
         if(savedAppUser==null){
-            throw  new ResourceNotFoundException("error");
+            throw  new ResourceNotFoundException("This user existed");
         }
         return ResponseEntity.ok().body(savedAppUser);
     }
