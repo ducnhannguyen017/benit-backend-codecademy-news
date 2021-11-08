@@ -37,11 +37,11 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         }
         else{
             String authorizationHeader = request.getHeader(AUTHORIZATION);
-            if(authorizationHeader!=null&&authorizationHeader.startsWith("Bearer ")){
+            if(authorizationHeader!=null&&authorizationHeader.startsWith(JwtConstant.TOKEN_PREFIX)){
                 try {
                     //detach token
-                    String token =authorizationHeader.substring("Bearer ".length());
-                    Algorithm algorithm= Algorithm.HMAC256(JwtConstant.secretKey.getBytes());
+                    String token =authorizationHeader.substring(JwtConstant.TOKEN_PREFIX.length());
+                    Algorithm algorithm= Algorithm.HMAC256(JwtConstant.SECRET_KEY.getBytes());
                     JWTVerifier verifier = JWT.require(algorithm).build();
                     DecodedJWT decodedJWT= verifier.verify(token);
                     //get infor in token
@@ -52,7 +52,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     stream(roles).forEach(role->{
                         authorities.add(new SimpleGrantedAuthority(role));
                     });
-
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -62,7 +61,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     log.error("error loging in {}", exception.getMessage());
                     response.setHeader("error", exception.getMessage());
                     response.setStatus(HttpStatus.FORBIDDEN.value());
-//                    response.sendError(HttpStatus.FORBIDDEN.value());
 
                     Map<String, String> errors = new HashMap<>();
                     errors.put("error_message", exception.getMessage());

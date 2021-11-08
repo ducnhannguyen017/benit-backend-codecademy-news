@@ -57,10 +57,11 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication( HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         User user = (User)authentication.getPrincipal();
-        Algorithm algorithm= Algorithm.HMAC256(JwtConstant.secretKey.getBytes());
+        Algorithm algorithm= Algorithm.HMAC256(JwtConstant.SECRET_KEY.getBytes());
+
         String access_token= JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis()+1000*60*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis()+ JwtConstant.EXPIRATION_TIME_ACCESS_KEY))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", user.getAuthorities()
                                         .stream().map(GrantedAuthority::getAuthority)
@@ -69,20 +70,11 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
         String refresh_token= JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis()+24*60*60*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis()+JwtConstant.EXPIRATION_TIME_REFRESH_KEY))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
-        AppUser appUser= appUserService.getUserByUsername(user.getUsername());
 
-//        Map<String, Object> tokens = new HashMap<>();
-//        tokens.put("id",appUser.getId().toString());
-//        tokens.put("username",appUser.getUsername());
-//        tokens.put("name",appUser.getName());
-//        tokens.put("roles", appUser.getRoles());
-//        tokens.put("avatar",appUser.getAvatar());
-//        tokens.put("introduction", appUser.getIntroduction());
-//        tokens.put("access_token", access_token);
-//        tokens.put("refresh_token", refresh_token);
+        AppUser appUser= appUserService.getUserByUsername(user.getUsername());
         ResponseTokenDto responseTokenDto = new ResponseTokenDto(appUser,access_token, refresh_token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), responseTokenDto);
